@@ -1,0 +1,12 @@
+gcloud compute scp data\train_sequences_with_smiles.csv donatasrep@gpu-instance:workspace/PREnzyme/data/ --zone europe-west1-d
+
+to_cloud() { 
+if [[ -d $1 ]]; then
+    echo "$1 is a directory"
+    gcloud compute scp --recurse $1 donatasrep@gpu-instance:workspace/PREnzyme/data/$1 --zone europe-west1-d
+else
+    echo "$1 is a file"
+    gcloud compute scp $1 donatasrep@gpu-instance:workspace/PREnzyme/data/$2 --zone europe-west1-d
+fi; }
+
+from_cloud() { gcloud compute scp donatasrep@gpu-instance:workspace/PREnzyme/data/$1 . --zone europe-west1-d; }
