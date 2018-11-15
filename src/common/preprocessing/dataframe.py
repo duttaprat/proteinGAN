@@ -6,6 +6,7 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 
+
 def split_dataframe_list_to_rows(df, target_column, separator):
     """Splits column that contains list into row per element of the list.
 
@@ -116,6 +117,19 @@ def save_as_tfrecords_multithreaded(path, original_data, columns=["sequence"], g
     coord.join(threads)
     print("Completed all threads in {} seconds".format(time.time() - threading_start))
 
+
+def to_int_feature(data):
+    """
+    Converts int list to tf Feature
+    Args:
+        data: int list to be stored in tf record
+
+    Returns:
+        tf Feature that is used in building tfrecord
+    """
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=data))
+
+
 def save_as_tfrecords(filename, data, columns=["sequence"], extension="tfrecords"):
     """Processes a dataframe and stores data into tfrecord file
 
@@ -131,17 +145,16 @@ def save_as_tfrecords(filename, data, columns=["sequence"], extension="tfrecords
         filename = "{}.{}".format(filename, extension)
         with tf.python_io.TFRecordWriter(filename) as writer:
             for index, row in data.iterrows():
-                example = tf.train.SequenceExample()
-                example.context.feature["label"].int64_list.value.append(row[0])
+                feature = {
+                    'label': tf.train.Feature(int64_list=tf.train.Int64List(value=[row[0]])),
 
-                length = 0
+                }
                 for index, col_name in enumerate(columns):
-                    feature_input = example.feature_lists.feature_list[col_name]
-                    for element in row[index + 1]:
-                        feature_input.feature.add().int64_list.value.append(element)
-                        length = length + 1
+                    value = row[index]
+                    feature[col_name] = to_int_feature(value)
+                    feature['length_' + col_name]:  to_int_feature(len(value))
 
-                example.context.feature["length"].int64_list.value.append(length)
+                example = tf.train.Example(features=tf.train.Features(feature=feature))
                 writer.write(example.SerializeToString())
 
         print("Data was stored in {}".format(filename))

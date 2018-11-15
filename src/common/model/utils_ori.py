@@ -64,19 +64,17 @@ def extract_seq_and_label(record, args):
       Sequence and label as tensors
 
     """
-    context_features, seq_features = tf.parse_single_sequence_example(
+    features = tf.parse_single_example(
         serialized=record,
-        context_features={
-            'label': tf.FixedLenFeature([], tf.int64),
-            'length': tf.FixedLenFeature([], tf.int64)
-        },
-        sequence_features={
+        features={
+            'label': tf.FixedLenFeature([1], tf.int64),
+            'length': tf.FixedLenFeature([1], tf.int64),
             'sequence': tf.FixedLenSequenceFeature([], dtype=tf.int64, allow_missing=False)
-        }
+        },
     )
-    seq = tf.cast(seq_features['sequence'], tf.int32, name="seq")
-    length = tf.cast(context_features['length'], tf.int32)
-    labels = tf.cast(context_features['label'], tf.int32, name="labels")
+    seq = tf.cast(features['sequence'], tf.int32, name="seq")
+    length = tf.cast(features['length'], tf.int32)
+    labels = tf.cast(features['label'], tf.int32, name="labels")
 
     seq = pad_up_to(seq, args[0], dynamic_padding=args[1])
     return seq, labels

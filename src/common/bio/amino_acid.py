@@ -12,7 +12,7 @@ def from_amino_acid_to_id(data, column):
       array of ids
 
     """
-    return [[AMINO_ACID_TO_ID[char] for char in val] for index, val in data[column].iteritems()]
+    return data[column].apply(lambda x: [AMINO_ACID_TO_ID[c] for c in x])
 
 
 def from_id_from_amino_acid(data, column):
