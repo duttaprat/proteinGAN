@@ -13,12 +13,12 @@ parser = argparse.ArgumentParser()
 
 ## Required parameters
 parser.add_argument("--source_file",
-                    default="../data/protein/classification/data_sources/uniprot-reviewed%3Ayes.tab.gz",
+                    default="../data/protein/embedding/data_sources/unreviewed.gz",
                     type=str,
                     required=False,
                     help="Path the source file of data to process")
 parser.add_argument("--destination",
-                    default="../data/protein/embedding/sample",
+                    default="../data/protein/embedding/sample/eval",
                     type=str,
                     required=False,
                     help="Path the folder the to store results")
@@ -29,7 +29,7 @@ parser.add_argument("--chunksize",
                     help="The size of chunk")
 
 parser.add_argument("--column_id",
-                    default=2,
+                    default=1,
                     type=int,
                     help="Column id to use")
 
@@ -43,7 +43,6 @@ def foo(data, path, chucksize):
         logging.debug("Starting thread")
         threading_start = time.time()
         data = filter_non_standard_amino_acids(data, "Sequence")
-        data = data[(data.Sequence.str.len() <= 256) & (data.Sequence.str.len() > 64)]
         data = from_amino_acid_to_id(data, "Sequence")
         filename = "{}/{}.{}".format(path, str(data.index[0] // chucksize), "tfrecords.gz")
         options = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.GZIP)
